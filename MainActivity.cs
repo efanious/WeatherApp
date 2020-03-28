@@ -5,6 +5,7 @@ using Android.Runtime;
 using Android.Widget;
 using System.Net.Http;
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace WeatherApp
 {
@@ -66,6 +67,19 @@ namespace WeatherApp
             string result = await client.GetStringAsync(url);
 
             Console.WriteLine(result);
+
+            var resultObject = JObject.Parse(result);
+
+            string weatherDescription = resultObject["weather"][0]["description"].ToString();
+            string icon = resultObject["weather"][0]["icon"].ToString();
+            string temperature = resultObject["main"]["temp"].ToString();
+            string placename = resultObject["name"].ToString();
+            string country = resultObject["sys"]["country"].ToString();
+
+
+            weatherDescriptionTextView.Text = weatherDescription;
+            placeTextView.Text = placename + ", " + country;
+            temperatureTextView.Text = temperature;
         }
     }
 }
