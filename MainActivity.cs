@@ -6,6 +6,8 @@ using Android.Widget;
 using System.Net.Http;
 using System;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
+using WeatherApp.Fragments;
 
 namespace WeatherApp
 {
@@ -19,6 +21,8 @@ namespace WeatherApp
         TextView weatherDescriptionTextView;
         EditText cityNameEditText;
         ImageView weatherImageView;
+
+        ProgressDialogFragment progressDialog;
 
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -58,12 +62,11 @@ namespace WeatherApp
                 return;
             }
 
+            ShowProgressDialog("Fetching weather...");
+            // Asyncronous API call using HttpClient
             string url = apiBase + place + "&appid=" + apiKey + "&units=" + unit;
-
             var handler = new HttpClientHandler();
-
             HttpClient client = new HttpClient(handler);
-
             string result = await client.GetStringAsync(url);
 
             Console.WriteLine(result);
@@ -75,11 +78,33 @@ namespace WeatherApp
             string temperature = resultObject["main"]["temp"].ToString();
             string placename = resultObject["name"].ToString();
             string country = resultObject["sys"]["country"].ToString();
+            weatherDescription = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(weatherDescription);
 
 
             weatherDescriptionTextView.Text = weatherDescription;
             placeTextView.Text = placename + ", " + country;
             temperatureTextView.Text = temperature;
+
+            CloseProgressDialog();
         }
+
+
+        void ShowProgressDialog(string status)
+        {
+            progressDialog = new ProgressDialogFragment(status);
+            var trans = SupportFragmentManager.BeginTransaction();
+            progressDialog.Cancelable = false;
+            progressDialog.Show(trans, "progress");
+        }
+
+        void CloseProgressDialog()
+        {
+            if(progressDialog != null)
+            {
+                progressDialog.Dismiss();
+                progressDialog = null;
+            }
+        }
+
     }
 }
