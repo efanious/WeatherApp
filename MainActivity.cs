@@ -11,6 +11,7 @@ using WeatherApp.Fragments;
 using System.Net;
 using System.IO;
 using Android.Graphics;
+using Plugin.Connectivity;
 
 namespace WeatherApp
 {
@@ -43,6 +44,7 @@ namespace WeatherApp
 
 
             getWeatherButton.Click += GetWeatherButton_Click;
+            GetWeather("Accra");
 
         }
 
@@ -50,7 +52,7 @@ namespace WeatherApp
         {
             string place = cityNameEditText.Text;
             GetWeather(place);
-
+            cityNameEditText.Text = "";
         }
 
         async void GetWeather(string place)
@@ -62,6 +64,12 @@ namespace WeatherApp
             if (string.IsNullOrEmpty(place))
             {
                 Toast.MakeText(this, "please enter a valid city name", ToastLength.Short).Show();
+                return;
+            }
+
+            if (!CrossConnectivity.Current.IsConnected)
+            {
+                Toast.MakeText(this, "No internet connection", ToastLength.Short).Show();
                 return;
             }
 
