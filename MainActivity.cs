@@ -8,6 +8,9 @@ using System;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
 using WeatherApp.Fragments;
+using System.Net;
+using System.IO;
+using Android.Graphics;
 
 namespace WeatherApp
 {
@@ -84,6 +87,28 @@ namespace WeatherApp
             weatherDescriptionTextView.Text = weatherDescription;
             placeTextView.Text = placename + ", " + country;
             temperatureTextView.Text = temperature;
+
+            //Download Image using WebRequest
+            string ImageUrl = "http://openweathermap.org/img/wn/" + icon + "@2x" + ".png";
+
+            WebRequest request = default(WebRequest);
+            request = WebRequest.Create(ImageUrl);
+            request.Timeout = int.MaxValue;
+            request.Method = "GET";
+
+            //Response
+            WebResponse response = default(WebResponse);
+            response = await request.GetResponseAsync();
+
+            //Using memory stream helps us to easily convert what we are recieving to byte array
+            MemoryStream ms = new MemoryStream();
+            response.GetResponseStream().CopyTo(ms);
+
+            //Get Image
+            byte[] imageData = ms.ToArray();
+
+            Bitmap bitmap = BitmapFactory.DecodeByteArray(imageData, 0, imageData.Length);
+            weatherImageView.SetImageBitmap(bitmap);
 
             CloseProgressDialog();
         }
